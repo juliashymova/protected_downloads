@@ -1,0 +1,7 @@
+@CHARSET "UTF-8";
+
+.protected-downloads-toggler {
+	cursor: pointer;
+    margin-top: 20px;
+    color: blue;
+}

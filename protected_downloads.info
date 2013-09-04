@@ -1,0 +1,7 @@
+name = Protected Downloads
+description = Provides protected downloads and prints content in PDF. 
+dependencies[] = field_ui
+dependencies[] = print
+dependencies[] = webform_protected_downloads
+
+core = 7.x 

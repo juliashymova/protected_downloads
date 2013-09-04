@@ -1,0 +1,118 @@
+<?php
+
+/**
+ * Implementation of hook_field_info().
+ */
+function protected_downloads_field_info() {
+  return array(
+    'downloadsbuttonfield' => array(
+      'label' => t('Downloads button'),
+      'description' => t('Custom downloads button field.'),
+      'default_widget' => 'downloadsbuttonfield_text',
+      'default_formatter' => 'downloadsbuttonfield_default',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+
+function protected_downloads_field_widget_info() {
+  return array(
+      'downloadsbuttonfield_widget' => array(
+          'label' => t('Default'),
+          'field types' => array('downloadsbuttonfield'),
+      ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function protected_downloads_field_formatter_info() {
+  return array(
+      'downloadsbuttonfield_default' => array(
+          'label' => t('Downloads buttons format'),
+          'field types' => array('downloadsbuttonfield'),
+      ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function protected_downloads_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+    case 'downloadsbuttonfield_default':
+      $element[0] = array(
+        '#type' => 'container',
+        '#attributes' => array(),
+      );
+
+      if (webform_protected_downloads_node_has_protected_files($entity->nid)) {
+        $form = drupal_get_form('webform_client_form_' . $entity->nid, $entity, array());
+
+        $element[0]['link'] = array(
+          '#type' => 'markup',
+         // '#markup' => '<div class="protected-downloads-toggler" style="cursor:pointer;">Get restricted content</div>',
+          '#markup' => theme('restrictedcontentfield_formatter_default', array('node' => $entity)),
+          '#attached' => array(
+            'js' => array(drupal_get_path('module','protected_downloads') . '/protected_downloads.js'),
+            'css' => array(drupal_get_path('module','protected_downloads') . '/restrictedcontentfield.css'),
+          ),
+        );
+
+        $element[0]['form'] = array(
+          '#theme' => 'webform_view',
+          '#node' => $entity,
+          '#teaser' => '',
+          '#page' => '',
+          '#form' => $form,
+          '#enabled' => TRUE,
+          '#weight' => 10,
+        );
+      } else {
+        $element[0]['button'] = array(
+          '#type' => 'markup',
+          '#markup' => theme('downloadsbuttonfield_formatter_default', array('node' => $entity)),
+          '#attached' => array(
+              'css' => array(drupal_get_path('module','protected_downloads') . '/downloadsbuttonfield.css'),
+          ),
+        );
+      }
+
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_prepare_view().
+
+ */
+function protected_downloads_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  foreach ($items as $key => $item) {
+    if (!isset($item[0]['value'])) {
+      $items[$key][0]['value'] = 'Dummy value';
+    }
+  }
+}
+
+function protected_downloads_theme($existing, $type, $theme, $path) {
+  return array(
+      'downloadsbuttonfield_formatter_default' => array(
+          'template' => 'downloadsbuttonfield',
+          'variables' => array('node' => NULL),
+      ),
+      'restrictedcontentfield_formatter_default' => array(
+          'template' => 'restrictedcontentfield',
+          'variables' => array('node' => NULL),
+      ),
+  );
+}
+
+
